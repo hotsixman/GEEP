@@ -30,13 +30,15 @@ func (this _DB) Close() error {
 }
 
 func (this _DB) UpdateMainLogFile(filename string) error {
-	_, err := this.db.Exec("INSERT OR REPLACE `logfile-name` (filename) VALUES (?)", filename)
-	return err
+	//_, err := this.db.Exec(`INSERT "logfile-name" (filename) VALUES (?)`, filename)
+	//return err
+	return nil
 }
 
 func (this _DB) UpdateLogFile(processName string, filename string) error {
-	_, err := this.db.Exec("INSERT OR REPLACE `logfile` (name, filename) VALUES (?, ?)", processName, filename)
-	return err
+	//_, err := this.db.Exec("INSERT OR REPLACE `logfile` (name, filename) VALUES (?, ?)", processName, filename)
+	//return err
+	return nil
 }
 
 var initQueries []string = []string{

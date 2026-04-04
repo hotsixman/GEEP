@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"gpm/module/logger"
 	"gpm/module/types"
 	"net"
 	"os"
@@ -14,6 +15,7 @@ import (
 )
 
 type UDSServer struct {
+	log      *logger.Logger
 	listener net.Listener
 	clients  map[string]*serverSideClient
 	mutex    *sync.Mutex
@@ -27,7 +29,7 @@ type serverSideClient struct {
 	writer *bufio.Writer
 }
 
-func Listen() (*UDSServer, error) {
+func Listen(log *logger.Logger) (*UDSServer, error) {
 	socketPath := GetSocketPath()
 
 	if _, err := os.Stat(socketPath); err == nil {
@@ -40,6 +42,7 @@ func Listen() (*UDSServer, error) {
 	}
 
 	server := &UDSServer{
+		log:      log,
 		listener: listener,
 		clients:  make(map[string]*serverSideClient),
 		mutex:    &sync.Mutex{},
@@ -81,7 +84,7 @@ func (this *UDSServer) accept() {
 	}()
 }
 
-func (this *UDSServer) checkClient(conn net.Conn) (*bufio.Reader, map[string]string, error) {
+func (this *UDSServer) checkClient(conn net.Conn) (*bufio.Reader, map[string]any, error) {
 	reader := bufio.NewReader(conn)
 
 	JSON, err := reader.ReadString('\n')
@@ -90,7 +93,7 @@ func (this *UDSServer) checkClient(conn net.Conn) (*bufio.Reader, map[string]str
 	}
 	JSON = strings.TrimSpace(JSON)
 
-	var data map[string]string
+	var data map[string]any
 	err = json.Unmarshal([]byte(JSON), &data)
 	if err != nil {
 		return nil, nil, err
@@ -103,12 +106,23 @@ func (this *UDSServer) handleClient(conn net.Conn) {
 	defer conn.Close()
 	reader, data, err := this.checkClient(conn)
 	if err != nil {
+		this.log.Errorln(err)
+		return
+	}
+
+	if _, ok := data["type"].(string); !ok {
+		this.log.Errorln("Invalid message:", data)
 		return
 	}
 
 	switch data["type"] {
 	case "connect":
 		{
+			name, nameOk := data["name"].(string)
+			if !nameOk {
+				return
+			}
+
 			id := ""
 			for {
 				id = uuid.New().String()
@@ -118,7 +132,7 @@ func (this *UDSServer) handleClient(conn net.Conn) {
 			}
 			client := &serverSideClient{
 				conn:   conn,
-				name:   data["name"],
+				name:   name,
 				reader: reader,
 				writer: bufio.NewWriter(conn),
 			}
@@ -148,6 +162,26 @@ func (this *UDSServer) handleClient(conn net.Conn) {
 					}
 				}
 			}
+		}
+	case "start":
+		{
+			name, nameOk := data["name"].(string)
+			args, argsOk := data["args"].([]any)
+			if !nameOk || name == "" || !argsOk || len(args) == 0 {
+				this.log.Errorln("Cannot start process", data)
+				return
+			}
+
+			argsString := make([]string, len(args))
+			for i, v := range args {
+				str, ok := v.(string)
+				if !ok {
+					this.log.Errorln(fmt.Sprintf("%s is not a string.", v))
+				}
+				argsString[i] = str
+			}
+
+			this.pm.NewProcess(name, this, argsString...)
 		}
 	}
 }

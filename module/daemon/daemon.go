@@ -1,6 +1,7 @@
 package daemon
 
 import (
+	"fmt"
 	"gpm/module/database"
 	"gpm/module/logger"
 	"gpm/module/pm"
@@ -35,6 +36,7 @@ func DaemonInit() {
 	// main logger
 	log, err := logger.GetMainLogger()
 	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
@@ -44,7 +46,7 @@ func DaemonInit() {
 	// pid 체크
 	_, running, err := PIDManager.CheckPID()
 	if err != nil {
-		log.Logln("Cannot check GPM daemon is running.")
+		log.Logln(err)
 		os.Exit(1)
 	}
 	if running {
@@ -61,7 +63,7 @@ func DaemonInit() {
 	defer PIDManager.DeletePid()
 
 	// 서버 생성
-	udsServer, err := uds.Listen()
+	udsServer, err := uds.Listen(log)
 	if err != nil {
 		log.Logln("Cannot listen uds server.")
 		os.Exit(1)
@@ -69,8 +71,8 @@ func DaemonInit() {
 	log.SetUDSServer(udsServer)
 
 	// pm 생성
-	pm := &pm.PM{}
-	udsServer.SetPM(pm)
+	PM := pm.NewPM(log)
+	udsServer.SetPM(PM)
 
 	select {}
 }

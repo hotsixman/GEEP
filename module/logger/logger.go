@@ -35,6 +35,7 @@ type Logger struct {
 	timeRecording bool
 	udsServer     types.UDSServerInterface
 	mutex         *sync.Mutex
+	main          bool
 }
 
 func GetMainLogger() (*Logger, error) {
@@ -69,6 +70,7 @@ func GetMainLogger() (*Logger, error) {
 		true,
 		nil,
 		&sync.Mutex{},
+		true,
 	}, nil
 }
 
@@ -104,6 +106,7 @@ func CreateLogger(name string, timeRecording bool, udsServer types.UDSServerInte
 		timeRecording,
 		udsServer,
 		&sync.Mutex{},
+		false,
 	}, nil
 }
 
@@ -135,6 +138,9 @@ func (this *Logger) Logln(v ...any) {
 			this.udsServer.Broadcast(this.name, JSON)
 		}
 	}
+	if this.main {
+		Logln(v...)
+	}
 }
 
 func (this *Logger) Errorln(v ...any) {
@@ -160,6 +166,9 @@ func (this *Logger) Errorln(v ...any) {
 		if err == nil {
 			this.udsServer.Broadcast(this.name, JSON)
 		}
+	}
+	if this.main {
+		Errorln(v...)
 	}
 }
 

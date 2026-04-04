@@ -13,23 +13,23 @@ var connectCmd = &cobra.Command{
 	Use:   "connect",
 	Short: "Connect to process",
 	Run: func(cmd *cobra.Command, args []string) {
-		name, err := cmd.Flags().GetString("name")
-		if err != nil || name == "" {
-			logger.Errorln(err)
-			os.Exit(1)
-		}
+		closeChan := make(chan bool)
 
-		client, err := uds.Connect(name)
+		client, err := uds.Connect(args[0], closeChan)
 		if err != nil {
 			logger.Errorln(err)
 			os.Exit(1)
 		}
 
 		scanner := bufio.NewScanner(os.Stdin)
-		for scanner.Scan() {
-			command := scanner.Text()
-			client.Command(command)
-		}
+		go func() {
+			for scanner.Scan() {
+				command := scanner.Text()
+				client.Command(command)
+			}
+		}()
+
+		<-closeChan
 	},
 }
 

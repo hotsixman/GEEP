@@ -2,6 +2,7 @@ package types
 
 // PM
 type PMInterface interface {
+	NewProcess(name string, udsServer UDSServerInterface, args ...string) error
 	Input(name string, command string)
 }
 

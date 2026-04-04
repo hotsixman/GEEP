@@ -3,9 +3,10 @@ package uds
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"gpm/module/logger"
-	"log"
+	"io"
 	"net"
 	"strings"
 )
@@ -23,7 +24,7 @@ func makeConn() (net.Conn, error) {
 	return conn, nil
 }
 
-func Connect(name string) (*UDSClient, error) {
+func Connect(name string, closeChan chan bool) (*UDSClient, error) {
 	conn, err := makeConn()
 	if err != nil {
 		return nil, err
@@ -46,11 +47,19 @@ func Connect(name string) (*UDSClient, error) {
 	}
 
 	go func() {
+		defer func() {
+			closeChan <- true
+			close(closeChan)
+		}()
 		reader := bufio.NewReader(conn)
 		for {
 			message, err := reader.ReadString('\n')
 			if err != nil {
-				log.Println(err)
+				if errors.Is(err, io.EOF) {
+					logger.Errorln("Connection Closed.")
+				} else {
+					logger.Errorln(err)
+				}
 				return
 			}
 
@@ -87,5 +96,24 @@ func (this *UDSClient) Command(command string) error {
 	}
 
 	_, err = this.conn.Write(append(JSON, '\n'))
+	return err
+}
+
+func Start(name string, args ...string) error {
+	conn, err := makeConn()
+	if err != nil {
+		return err
+	}
+
+	JSON, err := json.Marshal(map[string]any{
+		"type": "start",
+		"name": name,
+		"args": args,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = conn.Write(append(JSON, '\n'))
 	return err
 }

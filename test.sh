@@ -1,0 +1,1 @@
+while true; do echo "앙"; sleep 1; done
