@@ -2,7 +2,7 @@ package types
 
 // PM
 type PMInterface interface {
-	NewProcess(name string, udsServer UDSServerInterface, args ...string) error
+	NewProcess(StartMessage) error
 	Input(name string, command string)
 }
 
@@ -11,7 +11,7 @@ type LoggerInterface interface {
 }
 
 // UDS
-type UDSServerInterface interface {
+type ServerInterface interface {
 	Broadcast(name string, JSON []byte)
 }
 

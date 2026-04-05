@@ -1,0 +1,5 @@
+console.log(1)
+console.error(2)
+console.log(3)
+console.error(4)
+console.log(5)

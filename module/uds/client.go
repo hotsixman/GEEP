@@ -6,12 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"gpm/module/logger"
+	"gpm/module/types"
 	"io"
 	"net"
 	"strings"
 )
 
-type UDSClient struct {
+type UDSConnectionClient struct {
 	conn net.Conn
 }
 
@@ -24,20 +25,23 @@ func makeConn() (net.Conn, error) {
 	return conn, nil
 }
 
-func Connect(name string, closeChan chan bool) (*UDSClient, error) {
+// Connect
+func Connect(name string, closeChan chan bool) (*UDSConnectionClient, error) {
 	conn, err := makeConn()
 	if err != nil {
 		return nil, err
 	}
 
-	client := &UDSClient{
+	client := &UDSConnectionClient{
 		conn: conn,
 	}
 
-	JSON, err := json.Marshal(map[string]string{
-		"type": "connect",
-		"name": name,
-	})
+	// send message
+	message := types.ConnectRequestMessage{
+		Type: "connect",
+		Name: name,
+	}
+	JSON, err := json.Marshal(message)
 	if err != nil {
 		return nil, err
 	}
@@ -46,6 +50,7 @@ func Connect(name string, closeChan chan bool) (*UDSClient, error) {
 		return nil, err
 	}
 
+	// Log & Close
 	go func() {
 		defer func() {
 			closeChan <- true
@@ -86,11 +91,13 @@ func Connect(name string, closeChan chan bool) (*UDSClient, error) {
 	return client, nil
 }
 
-func (this *UDSClient) Command(command string) error {
-	JSON, err := json.Marshal(map[string]string{
-		"type":    "command",
-		"command": command,
-	})
+func (this *UDSConnectionClient) Command(command string) error {
+	message := types.CommandMessage{
+		Type:    "command",
+		Command: command,
+	}
+
+	JSON, err := json.Marshal(message)
 	if err != nil {
 		return err
 	}
@@ -99,17 +106,14 @@ func (this *UDSClient) Command(command string) error {
 	return err
 }
 
-func Start(name string, args ...string) error {
+// Start
+func Start(startMessage types.StartMessage) error {
 	conn, err := makeConn()
 	if err != nil {
 		return err
 	}
 
-	JSON, err := json.Marshal(map[string]any{
-		"type": "start",
-		"name": name,
-		"args": args,
-	})
+	JSON, err := json.Marshal(startMessage)
 	if err != nil {
 		return err
 	}

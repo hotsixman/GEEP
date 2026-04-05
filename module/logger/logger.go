@@ -33,7 +33,7 @@ type Logger struct {
 	file          *os.File
 	name          string
 	timeRecording bool
-	udsServer     types.UDSServerInterface
+	server        types.ServerInterface
 	mutex         *sync.Mutex
 	main          bool
 }
@@ -74,7 +74,7 @@ func GetMainLogger() (*Logger, error) {
 	}, nil
 }
 
-func CreateLogger(name string, timeRecording bool, udsServer types.UDSServerInterface) (*Logger, error) {
+func CreateLogger(name string, timeRecording bool, server types.ServerInterface) (*Logger, error) {
 	homeDir, err := util.GetHomeDirPath()
 	if err != nil {
 		return nil, err
@@ -104,14 +104,14 @@ func CreateLogger(name string, timeRecording bool, udsServer types.UDSServerInte
 		file,
 		name,
 		timeRecording,
-		udsServer,
+		server,
 		&sync.Mutex{},
 		false,
 	}, nil
 }
 
-func (this *Logger) SetUDSServer(udsServer types.UDSServerInterface) {
-	this.udsServer = udsServer
+func (this *Logger) SetServer(server types.ServerInterface) {
+	this.server = server
 }
 
 func (this *Logger) Logln(v ...any) {
@@ -127,7 +127,7 @@ func (this *Logger) Logln(v ...any) {
 	if this.file != nil {
 		this.appendLog(header + " " + message)
 	}
-	if this.udsServer != nil {
+	if this.server != nil {
 		messageJSON := map[string]string{
 			"type":    "log",
 			"message": message,
@@ -135,7 +135,7 @@ func (this *Logger) Logln(v ...any) {
 
 		JSON, err := json.Marshal(messageJSON)
 		if err == nil {
-			this.udsServer.Broadcast(this.name, JSON)
+			this.server.Broadcast(this.name, JSON)
 		}
 	}
 	if this.main {
@@ -156,7 +156,7 @@ func (this *Logger) Errorln(v ...any) {
 	if this.file != nil {
 		this.appendLog(header + " " + message)
 	}
-	if this.udsServer != nil {
+	if this.server != nil {
 		messageJSON := map[string]string{
 			"type":    "error",
 			"message": message,
@@ -164,7 +164,7 @@ func (this *Logger) Errorln(v ...any) {
 
 		JSON, err := json.Marshal(messageJSON)
 		if err == nil {
-			this.udsServer.Broadcast(this.name, JSON)
+			this.server.Broadcast(this.name, JSON)
 		}
 	}
 	if this.main {

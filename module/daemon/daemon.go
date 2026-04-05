@@ -68,11 +68,15 @@ func DaemonInit() {
 		log.Logln("Cannot listen uds server.")
 		os.Exit(1)
 	}
-	log.SetUDSServer(udsServer)
+	log.SetServer(udsServer)
 
 	// pm 생성
 	PM := pm.NewPM(log)
+	PM.SetServer(udsServer)
 	udsServer.SetPM(PM)
+
+	// log
+	log.Logln("GPM daemon started.")
 
 	select {}
 }

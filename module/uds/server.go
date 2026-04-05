@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/mitchellh/mapstructure"
 )
 
 type UDSServer struct {
@@ -93,32 +94,32 @@ func (this *UDSServer) checkClient(conn net.Conn) (*bufio.Reader, map[string]any
 	}
 	JSON = strings.TrimSpace(JSON)
 
-	var data map[string]any
-	err = json.Unmarshal([]byte(JSON), &data)
+	var message map[string]any
+	err = json.Unmarshal([]byte(JSON), &message)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return reader, data, nil
+	return reader, message, nil
 }
 
 func (this *UDSServer) handleClient(conn net.Conn) {
 	defer conn.Close()
-	reader, data, err := this.checkClient(conn)
+	reader, message, err := this.checkClient(conn)
 	if err != nil {
 		this.log.Errorln(err)
 		return
 	}
 
-	if _, ok := data["type"].(string); !ok {
-		this.log.Errorln("Invalid message:", data)
+	if _, ok := message["type"].(string); !ok {
+		this.log.Errorln("Invalid message:", message)
 		return
 	}
 
-	switch data["type"] {
+	switch message["type"] {
 	case "connect":
 		{
-			name, nameOk := data["name"].(string)
+			name, nameOk := message["name"].(string)
 			if !nameOk {
 				return
 			}
@@ -165,23 +166,14 @@ func (this *UDSServer) handleClient(conn net.Conn) {
 		}
 	case "start":
 		{
-			name, nameOk := data["name"].(string)
-			args, argsOk := data["args"].([]any)
-			if !nameOk || name == "" || !argsOk || len(args) == 0 {
-				this.log.Errorln("Cannot start process", data)
+			var startMessage types.StartMessage
+			err := mapstructure.Decode(message, &startMessage)
+			if err != nil {
+				this.log.Errorln(err)
 				return
 			}
 
-			argsString := make([]string, len(args))
-			for i, v := range args {
-				str, ok := v.(string)
-				if !ok {
-					this.log.Errorln(fmt.Sprintf("%s is not a string.", v))
-				}
-				argsString[i] = str
-			}
-
-			this.pm.NewProcess(name, this, argsString...)
+			this.pm.NewProcess(startMessage)
 		}
 	}
 }

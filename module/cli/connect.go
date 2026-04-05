@@ -10,17 +10,23 @@ import (
 )
 
 var connectCmd = &cobra.Command{
-	Use:   "connect",
+	Use:   "connect [name]",
 	Short: "Connect to process",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		closeChan := make(chan bool)
+		if len(args) == 0 || args[0] == "" {
+			logger.Errorln("1 argument is needed.")
+			return
+		}
 
+		closeChan := make(chan bool)
 		client, err := uds.Connect(args[0], closeChan)
 		if err != nil {
 			logger.Errorln(err)
 			os.Exit(1)
 		}
 
+		// stdin 에서 command를 읽어서 전송
 		scanner := bufio.NewScanner(os.Stdin)
 		go func() {
 			for scanner.Scan() {
@@ -34,6 +40,5 @@ var connectCmd = &cobra.Command{
 }
 
 func init() {
-	connectCmd.Flags().StringP("name", "", "", "Name of process")
 	rootCmd.AddCommand(connectCmd)
 }
