@@ -1,0 +1,1 @@
+- [ ] stdout과 stderr 로그 분리
