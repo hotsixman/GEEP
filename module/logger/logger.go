@@ -3,10 +3,8 @@ package logger
 import (
 	"encoding/json"
 	"fmt"
-	"gpm/module/database"
 	"gpm/module/types"
 	"gpm/module/util"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -29,13 +27,13 @@ func Errorln(v ...any) {
 }
 
 type Logger struct {
-	dirPath       string
-	file          *os.File
-	name          string
-	timeRecording bool
-	server        types.ServerInterface
-	mutex         *sync.Mutex
-	main          bool
+	dirPath   string
+	logFile   *os.File
+	errorFile *os.File
+	name      string
+	server    types.ServerInterface
+	mutex     *sync.Mutex
+	main      bool
 }
 
 func GetMainLogger() (*Logger, error) {
@@ -52,25 +50,30 @@ func GetMainLogger() (*Logger, error) {
 		}
 	}
 
-	filename := util.Now() + ".log"
-	err = database.DB.UpdateMainLogFile(filename)
+	logFilename := strings.ReplaceAll(util.Now(), ":", "_") + " log.log"
+	errorFilename := strings.ReplaceAll(util.Now(), ":", "_") + " error.log"
+	//err = database.DB.UpdateMainLogFile(filename)
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	logFile, err := os.OpenFile(filepath.Join(dirPath, logFilename), os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		return nil, err
 	}
-
-	file, err := os.OpenFile(filepath.Join(dirPath, filename), os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+	errorFile, err := os.OpenFile(filepath.Join(dirPath, errorFilename), os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Logger{
-		dirPath,
-		file,
-		"",
-		true,
-		nil,
-		&sync.Mutex{},
-		true,
+		dirPath:   dirPath,
+		logFile:   logFile,
+		errorFile: errorFile,
+		name:      "",
+		server:    nil,
+		mutex:     &sync.Mutex{},
+		main:      true,
 	}, nil
 }
 
@@ -88,25 +91,27 @@ func CreateLogger(name string, timeRecording bool, server types.ServerInterface)
 		}
 	}
 
-	filename := name + "-" + util.Now() + ".log"
-	err = database.DB.UpdateLogFile(name, filename)
-	if err != nil {
-		return nil, err
-	}
+	logFilename := name + "-" + strings.ReplaceAll(util.Now(), ":", "_") + " log.log"
+	errorFilename := name + "-" + strings.ReplaceAll(util.Now(), ":", "_") + " error.log"
+	//err = database.DB.UpdateLogFile(name, filename)
+	//if err != nil {
+	//	return nil, err
+	//}
 
-	file, err := os.OpenFile(filepath.Join(dirPath, filename), os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+	logFile, err := os.OpenFile(filepath.Join(dirPath, logFilename), os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+	errorFile, err := os.OpenFile(filepath.Join(dirPath, errorFilename), os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Logger{
-		dirPath,
-		file,
-		name,
-		timeRecording,
-		server,
-		&sync.Mutex{},
-		false,
+		dirPath:   dirPath,
+		logFile:   logFile,
+		errorFile: errorFile,
+		name:      name,
+		server:    server,
+		mutex:     &sync.Mutex{},
+		main:      true,
 	}, nil
 }
 
@@ -116,15 +121,10 @@ func (this *Logger) SetServer(server types.ServerInterface) {
 
 func (this *Logger) Logln(v ...any) {
 	message := strings.TrimRight(fmt.Sprintln(v...), " \t\n\r")
-	header := ""
-	if this.timeRecording {
-		timeString := "[" + time.Now().Format("2006-01-02 15:04:05") + "]"
-		header = "\033[32m" + timeString + " [LOG]" + "\033[0m"
-	} else {
-		header = "\033[32m" + " [LOG]" + "\033[0m"
-	}
+	timeString := "[" + time.Now().Format("2006-01-02 15:04:05") + "]"
+	header := "\033[32m" + timeString + " [LOG]" + "\033[0m"
 
-	if this.file != nil {
+	if this.logFile != nil {
 		this.appendLog(header + " " + message)
 	}
 	if this.server != nil {
@@ -145,15 +145,10 @@ func (this *Logger) Logln(v ...any) {
 
 func (this *Logger) Errorln(v ...any) {
 	message := strings.TrimRight(fmt.Sprintln(v...), " \t\n\r")
-	header := ""
-	if this.timeRecording {
-		timeString := "[" + time.Now().Format("2006-01-02 15:04:05") + "]"
-		header = "\033[31m" + timeString + " [Error]" + "\033[0m"
-	} else {
-		header = "\033[31m" + " [Error]" + "\033[0m"
-	}
+	timeString := "[" + time.Now().Format("2006-01-02 15:04:05") + "]"
+	header := "\033[31m" + timeString + " [Error]" + "\033[0m"
 
-	if this.file != nil {
+	if this.errorFile != nil {
 		this.appendLog(header + " " + message)
 	}
 	if this.server != nil {
@@ -176,9 +171,16 @@ func (this *Logger) appendLog(message string) {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 
-	this.file.WriteString(message + "\n")
+	this.logFile.WriteString(message + "\n")
+}
+func (this *Logger) appendError(message string) {
+	this.mutex.Lock()
+	defer this.mutex.Unlock()
+
+	this.errorFile.WriteString(message + "\n")
 }
 
+/*
 func (this *Logger) ReadLastLines(n int) ([]string, error) {
 	this.mutex.Lock()
 	if this.file == nil {
@@ -255,30 +257,36 @@ func (this *Logger) readLastLinesInternal(file *os.File, n int, fileSize int64) 
 	}
 	return lines, nil
 }
+*/
 
 func (this *Logger) recreateFile() error {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 
-	var filename string
-	if this.name == "" {
-		filename = util.Now() + ".log"
-		err := database.DB.UpdateMainLogFile(filename)
-		if err != nil {
-			return err
-		}
+	logFilename := ""
+	errorFilename := ""
+	if this.main {
+		logFilename = strings.ReplaceAll(util.Now(), ":", "_") + " log.log"
+		errorFilename = strings.ReplaceAll(util.Now(), ":", "_") + " error.log"
+		//err := database.DB.UpdateMainLogFile(filename)
+		//if err != nil {
+		//	return err
+		//}
 	} else {
-		filename = this.name + "-" + util.Now() + ".log"
-		err := database.DB.UpdateLogFile(this.name, filename)
-		if err != nil {
-			return err
-		}
+		logFilename = this.name + "-" + strings.ReplaceAll(util.Now(), ":", "_") + " log.log"
+		errorFilename = this.name + "-" + strings.ReplaceAll(util.Now(), ":", "_") + " error.log"
+		//err := database.DB.UpdateLogFile(this.name, filename)
+		//if err != nil {
+		//	return err
+		//}
 	}
 
-	file, err := os.OpenFile(filepath.Join(this.dirPath, filename), os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+	logFile, err := os.OpenFile(filepath.Join(this.dirPath, logFilename), os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		return err
 	}
-	this.file = file
+	errorFile, err := os.OpenFile(filepath.Join(this.dirPath, errorFilename), os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+	this.logFile = logFile
+	this.errorFile = errorFile
 	return nil
 }

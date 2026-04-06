@@ -7,14 +7,9 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"syscall"
 )
 
-type _pidManager struct{}
-
-var PIDManager _pidManager = _pidManager{}
-
-func (this _pidManager) CheckPID() (int, bool, error) {
+func checkPid() (int, bool, error) {
 	homeDir, err := util.GetHomeDirPath()
 	if err != nil {
 		return 0, false, err
@@ -35,25 +30,21 @@ func (this _pidManager) CheckPID() (int, bool, error) {
 		return 0, false, nil // 숫자가 아니면 잘못된 파일
 	}
 
-	// 3. 프로세스 생존 확인 (Signal 0)
-	err = syscall.Kill(pid, 0)
+	// 3. 프로세스 생존 확인
+	alive := isAlive(pid)
 
 	// err가 nil이면 존재함, syscall.EPERM이면 권한은 없지만 존재함
-	if err == nil || err == syscall.EPERM {
-		return pid, true, nil
-	}
-
-	return pid, false, nil
+	return pid, alive, nil
 }
 
-func (this _pidManager) RecordPid() error {
+func recordPid() error {
 	homeDir, err := util.GetHomeDirPath()
 	if err != nil {
 		return err
 	}
 
 	pidFilePath := filepath.Join(homeDir, "pid")
-	err = this.DeletePid()
+	err = deletePid()
 	if err != nil {
 		return err
 	}
@@ -71,7 +62,7 @@ func (this _pidManager) RecordPid() error {
 	return nil
 }
 
-func (this _pidManager) DeletePid() error {
+func deletePid() error {
 	homeDir, err := util.GetHomeDirPath()
 	if err != nil {
 		return err

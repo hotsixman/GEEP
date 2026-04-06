@@ -1,5 +1,8 @@
-console.log(1)
-console.error(2)
-console.log(3)
-console.error(4)
-console.log(5)
+while(1){
+    console.log(Date.now())
+    await new Promise((res) => {
+        setTimeout(res, 1000)
+    })
+}
+
+export {}

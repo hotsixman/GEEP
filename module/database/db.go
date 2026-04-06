@@ -3,8 +3,6 @@ package database
 import (
 	"database/sql"
 	"gpm/module/util"
-	"log"
-	"os"
 	"path/filepath"
 
 	_ "modernc.org/sqlite"
@@ -16,13 +14,10 @@ type _DB struct {
 
 var DB *_DB
 
-func init() {
+func Init() error {
 	var err error = nil
-	DB, err = OpenDB()
-	if err != nil {
-		log.Println("Cannot open database.")
-		os.Exit(1)
-	}
+	DB, err = openDB()
+	return err
 }
 
 func (this _DB) Close() error {
@@ -47,7 +42,7 @@ var initQueries []string = []string{
 	`CREATE TABLE IF NOT EXISTS "logfile-main" (filename TEXT);`,
 }
 
-func OpenDB() (*_DB, error) {
+func openDB() (*_DB, error) {
 	dbPath, err := getDBPath()
 	if err != nil {
 		return nil, err

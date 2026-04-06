@@ -2,9 +2,8 @@ package cli
 
 import (
 	"gpm/module/daemon"
-	"log"
+	"gpm/module/logger"
 	"os"
-	"syscall"
 
 	"github.com/spf13/cobra"
 )
@@ -13,24 +12,25 @@ var terminateCmd = &cobra.Command{
 	Use:   "terminate",
 	Short: "Terminate GPM daemon process",
 	Run: func(cmd *cobra.Command, args []string) {
-		pid, running, err := daemon.PIDManager.CheckPID()
-		if err != nil {
-			log.Println("???")
-			os.Exit(1)
+		status, err := daemon.KillDaemon()
+		switch status {
+		case -1:
+			{
+				logger.Errorln("Cannot find GPM daemon.")
+				os.Exit(1)
+			}
+		case 0:
+			{
+				logger.Logln("Successfully killed GPM daemon.")
+				os.Exit(0)
+			}
+		case 1:
+			{
+				logger.Errorln("Cannot kill GPM daemon.")
+				logger.Errorln(err)
+				os.Exit(1)
+			}
 		}
-
-		if !running {
-			log.Println("GPM daemon is not running.")
-			os.Exit(1)
-		}
-
-		err = syscall.Kill(pid, syscall.SIGTERM)
-		if err != nil {
-			log.Println("Cannot kill GPM daemon.")
-			os.Exit(1)
-		}
-		log.Println("Killed GPM daemon.")
-		os.Exit(0)
 	},
 }
 
