@@ -15,7 +15,7 @@ type Client struct {
 	reader *bufio.Reader
 }
 
-func NewClient(name string, conn net.Conn, reader *bufio.Reader, closeChan chan bool) (*Client, error) {
+func NewClient(name string, conn net.Conn, reader *bufio.Reader, messageChan chan types.LogMessage, closeChan chan bool) (*Client, error) {
 	client := &Client{
 		conn:   conn,
 		reader: reader,
@@ -51,22 +51,13 @@ func NewClient(name string, conn net.Conn, reader *bufio.Reader, closeChan chan 
 				return
 			}
 
-			message, err := util.ParseMessage[map[string]string]([]byte(messageJSON))
+			message, err := util.ParseMessage[types.LogMessage]([]byte(messageJSON))
 			if err != nil {
 				logger.Errorln(err)
 				continue
 			}
 
-			switch (*message)["type"] {
-			case "log":
-				if (*message)["message"] != "" {
-					logger.Logln((*message)["message"])
-				}
-			case "error":
-				if (*message)["message"] != "" {
-					logger.Errorln((*message)["message"])
-				}
-			}
+			messageChan <- *message
 		}
 	}()
 

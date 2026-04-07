@@ -9,5 +9,9 @@ const rl = readline.createInterface({
 
 // 한 줄씩 입력이 들어올 때마다 이벤트 발생
 rl.on('line', (line) => {
-  console.log(line + "푸하하");
+  if(line.startsWith('error')){
+    console.error(line)
+  } else{
+    console.log(line)
+  }
 });
