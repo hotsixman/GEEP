@@ -2,7 +2,7 @@ package database
 
 import (
 	"database/sql"
-	"gpm/module/util"
+	"geep/module/util"
 	"path/filepath"
 
 	_ "modernc.org/sqlite"

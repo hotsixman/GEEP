@@ -3,8 +3,8 @@ package logger
 import (
 	"encoding/json"
 	"fmt"
-	"gpm/module/types"
-	"gpm/module/util"
+	"geep/module/types"
+	"geep/module/util"
 	"os"
 	"path/filepath"
 	"strings"

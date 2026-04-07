@@ -1,7 +1,7 @@
 package pm
 
 import (
-	"gpm/module/types"
+	"geep/module/types"
 )
 
 func (pm *PM) List() []types.ListElement {

@@ -1,8 +1,8 @@
 package server
 
 import (
-	"gpm/module/types"
-	"gpm/module/util"
+	"geep/module/types"
+	"geep/module/util"
 	"net"
 
 	"github.com/mitchellh/mapstructure"

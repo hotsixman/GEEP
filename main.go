@@ -1,8 +1,8 @@
 package main
 
 import (
-	"gpm/module/cli"
-	"gpm/module/daemon"
+	"geep/module/cli"
+	"geep/module/daemon"
 	"os"
 )
 

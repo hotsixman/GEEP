@@ -3,8 +3,8 @@ package pm
 import (
 	"bufio"
 	"fmt"
-	"gpm/module/logger"
-	"gpm/module/types"
+	"geep/module/logger"
+	"geep/module/types"
 	"os"
 	"os/exec"
 

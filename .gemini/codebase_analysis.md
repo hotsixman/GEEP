@@ -1,13 +1,13 @@
-# Codebase Analysis: Go Process Manager (GPM)
+# Codebase Analysis: GEEP (Go + Keep) (GEEP)
 
-GPM은 Go 기반의 경량 프로세스 매니저입니다.
+GEEP은 Go 기반의 경량 프로세스 매니저입니다.
 
 ## 1. 아키텍처 개요 (Architecture Overview)
 
-GPM은 **CLI (Client)**와 **Daemon (Server)** 구조로 설계되었습니다. 사용자는 CLI를 통해 명령을 내리고, 백그라운드에서 실행되는 Daemon이 실제 프로세스 관리와 상태 유지를 담당합니다.
+GEEP은 **CLI (Client)**와 **Daemon (Server)** 구조로 설계되었습니다. 사용자는 CLI를 통해 명령을 내리고, 백그라운드에서 실행되는 Daemon이 실제 프로세스 관리와 상태 유지를 담당합니다.
 
 ### 1.1 프로그램 진입점 (`main.go`)
-- 환경 변수 `GPM_DAEMON_PROCESS`의 존재 여부에 따라 실행 모드를 결정합니다.
+- 환경 변수 `GEEP_DAEMON_PROCESS`의 존재 여부에 따라 실행 모드를 결정합니다.
   - `1`인 경우: `daemon.DaemonInit()` 실행 (Daemon 모드)
   - 그 외: `cli.Execute()` 실행 (CLI 모드)
 
@@ -15,7 +15,7 @@ GPM은 **CLI (Client)**와 **Daemon (Server)** 구조로 설계되었습니다. 
 
 ### 2.1 `module/cli` (Cobra 기반 CLI)
 - **Root**: `rootCmd` 정의 및 하위 명령어 관리.
-- **Init**: `gpm init` 명령 시 `daemon.Daemonize()`를 호출하여 백그라운드 데몬을 시작합니다.
+- **Init**: `geep init` 명령 시 `daemon.Daemonize()`를 호출하여 백그라운드 데몬을 시작합니다.
 - **Commands**: `start`, `stop`, `terminate`, `connect` 등 프로세스 관리 명령어를 포함합니다.
 
 ### 2.2 `module/daemon` (백그라운드 관리)
@@ -32,7 +32,7 @@ GPM은 **CLI (Client)**와 **Daemon (Server)** 구조로 설계되었습니다. 
 - 실제 외부 프로세스를 실행(`start.go`), 중지(`stop.go`) 시키는 핵심 비즈니스 로직을 담당합니다.
 
 ### 2.5 `module/database` (상태 유지)
-- **SQLite**: `~/.gpm/main.db`에 프로세스 정보 및 PID를 저장합니다.
+- **SQLite**: `~/.geep/main.db`에 프로세스 정보 및 PID를 저장합니다.
 - **PID Table**: 데몬의 중복 실행 방지를 위해 현재 데몬의 PID를 기록합니다.
 
 ### 2.6 `module/logger` (로그 관리)
@@ -40,12 +40,12 @@ GPM은 **CLI (Client)**와 **Daemon (Server)** 구조로 설계되었습니다. 
 
 ## 3. 핵심 워크플로우
 
-1. **데몬 시작**: `gpm init` -> `Daemonize()` (재실행) -> `DaemonInit()` (상주 시작).
-2. **명령 전달**: `gpm start <app>` -> CLI(`client`)가 UDS를 통해 Daemon(`server`)에 요청 -> Daemon(`pm`)이 프로세스 실행.
+1. **데몬 시작**: `geep init` -> `Daemonize()` (재실행) -> `DaemonInit()` (상주 시작).
+2. **명령 전달**: `geep start <app>` -> CLI(`client`)가 UDS를 통해 Daemon(`server`)에 요청 -> Daemon(`pm`)이 프로세스 실행.
 3. **상태 모니터링**: Daemon이 실행 중인 앱의 상태 및 로그를 실시간으로 추적.
 
 ## 4. 설정 및 파일 경로
-- **Base Dir**: `~/.gpm/`
-- **DB Path**: `~/.gpm/main.db`
-- **Socket Path**: `~/.gpm/gpm.sock`
-- **Daemon Log**: `~/.gpm/daemon.log`
+- **Base Dir**: `~/.geep/`
+- **DB Path**: `~/.geep/main.db`
+- **Socket Path**: `~/.geep/geep.sock`
+- **Daemon Log**: `~/.geep/daemon.log`

@@ -8,9 +8,9 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "gpm",
-	Short: "GPM is a process manager for Go applications",
-	Long:  `Go Process Manager (GPM) allows you to manage background processes with ease.`,
+	Use:   "geep",
+	Short: "GEEP is a process manager for Go applications",
+	Long:  `GEEP (Go + Keep) allows you to manage background processes with ease.`,
 }
 
 func Execute() {

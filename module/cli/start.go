@@ -2,9 +2,9 @@ package cli
 
 import (
 	"fmt"
-	"gpm/module/client"
-	"gpm/module/logger"
-	"gpm/module/types"
+	"geep/module/client"
+	"geep/module/logger"
+	"geep/module/types"
 	"os"
 
 	"github.com/spf13/cobra"

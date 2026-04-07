@@ -1,6 +1,6 @@
-# GPM (Go Process Manager) 🚀
+# GEEP (Go + Keep) 🚀
 
-GPM은 Go로 개발된 **경량 프로세스 매니저**입니다. 복잡한 설정 없이도 백그라운드에서 프로그램을 실행하고 관리할 수 있도록 설계되었습니다.
+GEEP은 Go로 개발된 **경량 프로세스 매니저**입니다. 복잡한 설정 없이도 백그라운드에서 프로그램을 실행하고 관리할 수 있도록 설계되었습니다.
 
 ---
 
@@ -17,45 +17,45 @@ GPM은 Go로 개발된 **경량 프로세스 매니저**입니다. 복잡한 설
 ## 🛠 사용 방법
 
 ### 1. 준비하기
-먼저 GPM을 빌드하여 실행 파일을 생성합니다.
+먼저 GEEP을 빌드하여 실행 파일을 생성합니다.
 ```bash
-go build -o gpm main.go
+go build -o geep main.go
 ```
 
-### 2. GPM 시작 (초기화)
-프로세스 관리를 시작하기 위해 GPM 데몬을 백그라운드에서 실행합니다. 이 작업은 처음에 한 번만 수행하면 됩니다.
+### 2. GEEP 시작 (초기화)
+프로세스 관리를 시작하기 위해 GEEP 데몬을 백그라운드에서 실행합니다. 이 작업은 처음에 한 번만 수행하면 됩니다.
 ```bash
-./gpm init
+./geep init
 ```
 
 ### 3. 프로그램 실행하기 (`start`)
 관리할 프로그램을 등록하고 실행합니다.
 ```bash
-./gpm start [프로세스_이름] --run "[실행할_명령어]"
+./geep start [프로세스_이름] --run "[실행할_명령어]"
 ```
 *예시: node 서버 실행*
 ```bash
-./gpm start my-app --run "node" --args "app.js" --cwd "/path/to/project"
+./geep start my-app --run "node" --args "app.js" --cwd "/path/to/project"
 ```
 
 ### 4. 상태 확인하기 (`list`)
 현재 관리 중인 프로그램들의 목록과 리소스 사용량을 확인합니다.
 ```bash
-./gpm list
+./geep list
 ```
 
 ### 5. 제어하기 (`stop`, `restart`, `delete`)
 - **중지**: 실행 중인 프로그램을 멈춥니다.
 ```bash
-./gpm stop [프로세스_이름]
+./geep stop [프로세스_이름]
 ```
 - **재시작**: 프로그램을 다시 시작합니다.
 ```bash
-./gpm restart [프로세스_이름]
+./geep restart [프로세스_이름]
 ```
 - **삭제**: 관리 목록에서 프로그램을 완전히 제거합니다.
 ```bash
-./gpm delete [프로세스_이름]
+./geep delete [프로세스_이름]
 ```
 
 ---
@@ -71,5 +71,5 @@ go build -o gpm main.go
 ---
 
 ## 📂 파일 위치
-- **데이터베이스 및 설정**: `~/.gpm/` (사용자 홈 디렉토리 내 `.gpm` 폴더)
-- **로그 파일**: `~/.gpm/log` 및 `~/.gpm/log-process`내의 각 프로세스별 로그
+- **데이터베이스 및 설정**: `~/.geep/` (사용자 홈 디렉토리 내 `.geep` 폴더)
+- **로그 파일**: `~/.geep/log` 및 `~/.geep/log-process`내의 각 프로세스별 로그

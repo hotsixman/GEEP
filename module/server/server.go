@@ -2,8 +2,8 @@ package server
 
 import (
 	"bufio"
-	"gpm/module/types"
-	"gpm/module/util"
+	"geep/module/types"
+	"geep/module/util"
 	"net"
 	"strings"
 	"sync"

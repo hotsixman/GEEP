@@ -3,8 +3,8 @@ package server
 import (
 	"bufio"
 	"errors"
-	"gpm/module/types"
-	"gpm/module/util"
+	"geep/module/types"
+	"geep/module/util"
 	"io"
 	"net"
 	"strings"

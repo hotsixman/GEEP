@@ -11,14 +11,14 @@ func GetHomeDirPath() (string, error) {
 		return "", err
 	}
 
-	return filepath.Join(dir, ".gpm"), nil
+	return filepath.Join(dir, ".geep"), nil
 }
 
 func GetUDSPath() string {
 	home, _ := os.UserHomeDir()
-	dir := filepath.Join(home, ".gpm")
+	dir := filepath.Join(home, ".geep")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.MkdirAll(dir, 0755)
 	}
-	return filepath.Join(dir, "gpm.sock")
+	return filepath.Join(dir, "geep.sock")
 }

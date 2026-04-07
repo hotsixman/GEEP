@@ -1,15 +1,15 @@
 set GOOS=linux
 set GOARCH=amd64
-go build -o dist/linux.bin
+go build -o dist/geep-linux
 
 set GOOS=darwin
 set GOARCH=arm64
-go build -o dist/mac-arm.bin
+go build -o dist/geep-mac-arm
 
 set GOOS=windows
 set GOARCH=amd64
-go build -o dist/windows-x64.exe
+go build -o dist/geep-windows-x64.exe
 
 set GOOS=windows
 set GOARCH=386
-go build -o dist/windows-x32.exe
+go build -o dist/geep-windows-x32.exe

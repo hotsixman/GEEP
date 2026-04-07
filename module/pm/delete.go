@@ -1,6 +1,6 @@
 package pm
 
-import "gpm/module/types"
+import "geep/module/types"
 
 func (pm *PM) Delete(message types.DeleteMessage) error {
 	process := pm.process[message.Name]

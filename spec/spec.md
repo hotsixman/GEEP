@@ -1,4 +1,4 @@
-# Go Process Manager (GPM) Specification
+# GEEP (Go + Keep) (GEEP) Specification
 
 Go 기반의 간단한 프로세스 매니저 사양서입니다.
 
@@ -21,7 +21,7 @@ Go 기반의 간단한 프로세스 매니저 사양서입니다.
 - 각 프로세스별로 별도의 로그 파일을 유지합니다.
 
 ### 1.4 상태 유지 (Persistence)
-- 프로세스 매니저(데몬)가 재시작되어도 이전에 관리하던 프로세스 목록과 상태를 복구할 수 있도록 상태를 `~/.gpm/dump.json` 파일에 저장합니다.
+- 프로세스 매니저(데몬)가 재시작되어도 이전에 관리하던 프로세스 목록과 상태를 복구할 수 있도록 상태를 `~/.geep/dump.json` 파일에 저장합니다.
 
 ## 2. 시스템 아키텍처
 
@@ -33,16 +33,16 @@ Go 기반의 간단한 프로세스 매니저 사양서입니다.
 
 ### 2.2 통신 방식 (IPC)
 - **Unix Domain Socket (UDS)**: `module/uds`를 통해 공통 관리됩니다.
-- **Socket Path**: `~/.gpm/gpm.sock` 경로를 사용합니다.
+- **Socket Path**: `~/.geep/geep.sock` 경로를 사용합니다.
 - **Protocol**: JSON 기반의 Request/Response 구조체를 사용합니다.
 
 ## 3. 프로젝트 구조 (Module Focused)
 
-- `cmd/gpm/`: CLI 엔트리 포인트 및 명령어 정의.
+- `cmd/geep/`: CLI 엔트리 포인트 및 명령어 정의.
 - `module/daemon/`: 프로세스 백그라운드 전환 및 플랫폼별 데몬화 로직.
 - `module/uds/`: 소켓 생성, 연결, 데이터 송수신 공통 로직.
 - `module/models/`: 공통 데이터 구조 (ProcessInfo, Request, Response).
-- `logs/`: `~/.gpm/daemon.log` 및 개별 프로세스 로그 보관.
+- `logs/`: `~/.geep/daemon.log` 및 개별 프로세스 로그 보관.
 
 ## 4. 기술 스택
 - **Language**: Go (Golang)

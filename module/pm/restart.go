@@ -1,6 +1,6 @@
 package pm
 
-import "gpm/module/types"
+import "geep/module/types"
 
 func (pm *PM) Restart(message types.RestartMessage) error {
 	process := pm.process[message.Name]

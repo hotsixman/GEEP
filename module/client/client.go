@@ -2,7 +2,7 @@ package client
 
 import (
 	"bufio"
-	"gpm/module/util"
+	"geep/module/util"
 	"net"
 )
 

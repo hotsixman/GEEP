@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"gpm/module/daemon"
-	"gpm/module/logger"
+	"geep/module/daemon"
+	"geep/module/logger"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -10,12 +10,12 @@ import (
 
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Start the GPM daemon process",
+	Short: "Start the GEEP daemon process",
 	Run: func(cmd *cobra.Command, args []string) {
-		if os.Getenv("GPM_DAEMON_PROCESS") == "1" {
+		if os.Getenv("GEEP_DAEMON_PROCESS") == "1" {
 			os.Exit(1)
 		}
-		logger.Logln("Starting GPM daemon in background...")
+		logger.Logln("Starting GEEP daemon in background...")
 		status, err := daemon.SpawnDaemon()
 		switch status {
 		case -1:
@@ -25,18 +25,18 @@ var initCmd = &cobra.Command{
 			}
 		case 0:
 			{
-				logger.Logln("GPM daemon started successfully!")
+				logger.Logln("GEEP daemon started successfully!")
 				os.Exit(0)
 			}
 		case 1:
 			{
-				logger.Errorln("Cannot start GPM daemon")
+				logger.Errorln("Cannot start GEEP daemon")
 				logger.Errorln(err)
 				os.Exit(1)
 			}
 		case 2:
 			{
-				logger.Errorln("GPM daemon is already running")
+				logger.Errorln("GEEP daemon is already running")
 				os.Exit(1)
 			}
 		}

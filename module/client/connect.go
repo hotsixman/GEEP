@@ -3,9 +3,9 @@ package client
 import (
 	"bufio"
 	"errors"
-	"gpm/module/logger"
-	"gpm/module/types"
-	"gpm/module/util"
+	"geep/module/logger"
+	"geep/module/types"
+	"geep/module/util"
 	"io"
 	"net"
 )

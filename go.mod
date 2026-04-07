@@ -1,4 +1,4 @@
-module gpm
+module geep
 
 go 1.26.1
 

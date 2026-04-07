@@ -2,16 +2,16 @@ package daemon
 
 import (
 	"fmt"
-	"gpm/module/database"
-	"gpm/module/logger"
-	"gpm/module/pm"
-	"gpm/module/server"
-	"gpm/module/util"
+	"geep/module/database"
+	"geep/module/logger"
+	"geep/module/pm"
+	"geep/module/server"
+	"geep/module/util"
 	"os"
 	"os/exec"
 )
 
-const DAEMON_ENV = "GPM_DAEMON_PROCESS"
+const DAEMON_ENV = "GEEP_DAEMON_PROCESS"
 
 /*
 -1: Not daemon
@@ -69,7 +69,7 @@ func DaemonInit() {
 		return
 	}
 
-	// .gpm folder
+	// .geep folder
 	homeDir, err := util.GetHomeDirPath()
 	if err != nil {
 		logger.Errorln(err)
@@ -103,7 +103,7 @@ func DaemonInit() {
 		os.Exit(1)
 	}
 	if running {
-		mainLogger.Logln("GPM is already running.")
+		mainLogger.Logln("GEEP is already running.")
 		os.Exit(1)
 	}
 
@@ -130,7 +130,7 @@ func DaemonInit() {
 	udsServer.SetPM(PM)
 
 	// log
-	mainLogger.Logln("GPM daemon started.")
+	mainLogger.Logln("GEEP daemon started.")
 
 	select {}
 }

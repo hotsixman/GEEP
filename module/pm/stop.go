@@ -1,7 +1,7 @@
 package pm
 
 import (
-	"gpm/module/types"
+	"geep/module/types"
 )
 
 func (pm *PM) Stop(message types.StopMessage) error {

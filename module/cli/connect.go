@@ -2,9 +2,9 @@ package cli
 
 import (
 	"fmt"
-	"gpm/module/client"
-	"gpm/module/logger"
-	"gpm/module/types"
+	"geep/module/client"
+	"geep/module/logger"
+	"geep/module/types"
 	"os"
 	"strings"
 
@@ -208,7 +208,7 @@ func (m model) View() string {
 	}
 
 	// 1. 헤더
-	header := titleStyle.Render(fmt.Sprintf(" GPM Connect: %s ", m.name))
+	header := titleStyle.Render(fmt.Sprintf(" GEEP Connect: %s ", m.name))
 
 	// 2. 에러 섹션 (상단)
 	errSection := lipgloss.JoinVertical(lipgloss.Left,
