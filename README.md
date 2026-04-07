@@ -35,7 +35,7 @@ go build -o gpm main.go
 ```
 *예시: node 서버 실행*
 ```bash
-./gpm start my-app --run "node app.js" --cwd "/path/to/project"
+./gpm start my-app --run "node" --args "app.js" --cwd "/path/to/project"
 ```
 
 ### 4. 상태 확인하기 (`list`)
