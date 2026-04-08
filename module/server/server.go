@@ -123,6 +123,13 @@ func (server *Server) handleClient(conn net.Conn) error {
 				server.mainLogger.Errorln(err)
 			}
 		}
+	case "killall":
+		{
+			err := server.killall(conn, message)
+			if err != nil {
+				server.mainLogger.Errorln(err)
+			}
+		}
 	}
 
 	return nil

@@ -9,6 +9,7 @@ type PMInterface interface {
 	Input(name string, command string) error
 	List() []ListElement
 	Tail(name string, lineCount int) ([]string, []string, error)
+	KillAll() []error
 }
 
 // Logger

@@ -97,6 +97,19 @@ type ListElement struct {
 	Recovered  int     `json:"recovered"`
 }
 
+// kill all
+
+type KillAllMessage struct {
+	// "killall"
+	Type string `json:"type"`
+}
+
+type KillAllResultMessage struct {
+	// "killallResult"
+	Type    string `json:"type"`
+	Success bool   `json:"success"`
+}
+
 // log
 type LogMessage struct {
 	// "log" | "error" | "rawlog" | "rawerror"

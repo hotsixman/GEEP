@@ -108,6 +108,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		msgString := msg.String()
+		switch msgString {
+		case "shift+up":
+			m.logViewport.ScrollUp(1)
+			m.errViewport.ScrollUp(1)
+			return m, nil
+		case "shift+down":
+			m.logViewport.ScrollDown(1)
+			m.errViewport.ScrollDown(1)
+			return m, nil
+		}
+
 		switch msg.Type {
 		case tea.KeyCtrlC, tea.KeyEsc:
 			return m, tea.Quit
@@ -126,28 +138,34 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case tea.KeyUp:
-			if len(m.history) > 0 {
-				if m.historyIndex == -1 {
-					m.tempInput = m.textInput.Value()
+			if msg.String() != "shift+up" {
+				if len(m.history) > 0 {
+					if m.historyIndex == -1 {
+						m.tempInput = m.textInput.Value()
+					}
+					if m.historyIndex < len(m.history)-1 {
+						m.historyIndex++
+						idx := len(m.history) - 1 - m.historyIndex
+						m.textInput.SetValue(m.history[idx])
+						m.textInput.SetCursor(len(m.history[idx]))
+					}
 				}
-				if m.historyIndex < len(m.history)-1 {
-					m.historyIndex++
-					idx := len(m.history) - 1 - m.historyIndex
-					m.textInput.SetValue(m.history[idx])
-					m.textInput.SetCursor(len(m.history[idx]))
-				}
+				return m, nil
 			}
 
 		case tea.KeyDown:
-			if m.historyIndex > -1 {
-				m.historyIndex--
-				if m.historyIndex == -1 {
-					m.textInput.SetValue(m.tempInput)
-				} else {
-					idx := len(m.history) - 1 - m.historyIndex
-					m.textInput.SetValue(m.history[idx])
+			if msg.String() != "shift+down" {
+				if m.historyIndex > -1 {
+					m.historyIndex--
+					if m.historyIndex == -1 {
+						m.textInput.SetValue(m.tempInput)
+					} else {
+						idx := len(m.history) - 1 - m.historyIndex
+						m.textInput.SetValue(m.history[idx])
+					}
+					m.textInput.SetCursor(len(m.textInput.Value()))
 				}
-				m.textInput.SetCursor(len(m.textInput.Value()))
+				return m, nil
 			}
 		}
 
